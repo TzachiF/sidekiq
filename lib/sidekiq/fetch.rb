@@ -39,6 +39,10 @@ module Sidekiq
         uow = UnitOfWork.new(*work)
         if uow.queue_name == 'unique_test_queue' && uniqe_worker
           return uow
+        elsif uow.queue_name == 'unique_test_queue' && !uniqe_worker
+          uow.requeue
+        elsif uow.queue_name != 'unique_test_queue' && !uniqe_worker
+          return uow
         else
           uow.requeue
         end
