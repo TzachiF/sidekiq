@@ -33,7 +33,14 @@ module Sidekiq
 
     def retrieve_work
       work = Sidekiq.redis { |conn| conn.brpop(*queues_cmd) }
-      UnitOfWork.new(*work) if work
+      if work
+        pid = Process.pid
+        uniqe_worker = Sidekiq.redis { |conn| conn.get("uniqe_worker:#{pid}") }
+        uow = UnitOfWork.new(*work)
+        if uow.queue_name == 'unique_test_queue' && uniqe_worker
+          return uow
+        end
+      end 
     end
 
     # Creating the Redis#brpop command takes into account any
