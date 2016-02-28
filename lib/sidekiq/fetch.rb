@@ -34,7 +34,7 @@ module Sidekiq
     def retrieve_work
       work = Sidekiq.redis { |conn| conn.brpop(*queues_cmd) }
       if work
-        pid = Process.pid
+        pid = ::Process.pid
         uniqe_worker = Sidekiq.redis { |conn| conn.get("uniqe_worker:#{pid}") }
         uow = UnitOfWork.new(*work)
         if uow.queue_name == 'unique_test_queue' && uniqe_worker
